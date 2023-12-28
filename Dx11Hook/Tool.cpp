@@ -16,7 +16,7 @@ void HookVtb(int64_t* vTable, int nIndex, void* NewAddr)
 	DWORD dwProp = 0;
 	VirtualProtect(vTable, 1024, PAGE_EXECUTE_READWRITE, &dwProp);
 	
-	vTable[nIndex] = (int64_t)NewAddr;
+	InterlockedExchange64(&vTable[nIndex], (LONG64)NewAddr);
 
 	VirtualProtect(vTable, 1024, dwProp, &dwProp);
 

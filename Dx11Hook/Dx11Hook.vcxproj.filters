@@ -55,7 +55,7 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Tool.h">
-      <Filter>头文件</Filter>
+      <Filter>tool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -87,7 +87,7 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Tool.cpp">
-      <Filter>源文件</Filter>
+      <Filter>tool</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

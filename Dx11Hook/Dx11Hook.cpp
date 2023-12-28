@@ -26,6 +26,8 @@ static WNDPROC gHwndOldWndProc = nullptr;
 
 static int64_t* gSwapVTable = nullptr;
 
+static bool g_bHooked = false;
+
 namespace vars
 {
 	static bool bMenuOpen = true;
@@ -68,8 +70,22 @@ HRESULT  FakePresent(
 	/* [in] */ UINT SyncInterval,
 	/* [in] */ UINT Flags);
 
+
+HRESULT  FakeResizeBuffers(
+	IDXGISwapChain* pSwapChain,
+	/* [in] */ UINT BufferCount,
+	/* [in] */ UINT Width,
+	/* [in] */ UINT Height,
+	/* [in] */ DXGI_FORMAT NewFormat,
+	/* [in] */ UINT SwapChainFlags);
+
+
 using PresentCall = decltype(&FakePresent);
 static PresentCall g_OriginPresentCall = nullptr;
+
+using ResizeBuffersCall = decltype(&FakeResizeBuffers);
+static ResizeBuffersCall g_OriginResizeBuffersCall = nullptr;
+
 
 
 void CleanupRenderTarget()
@@ -155,18 +171,21 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 	g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_mainRenderTargetView);
 	pBackBuffer->Release();
 
+	
 
-	SetupWndProcHook();
+	static auto once = []()
+	{
+		SetupWndProcHook();
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.Fonts->AddFontFromFileTTF("c:/windows/fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.Fonts->AddFontFromFileTTF("c:/windows/fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+		ImGui::StyleColorsDark();
+		ImGui_ImplWin32_Init(gHwnd);
+		return true;
+	}();
 
-
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplWin32_Init(gHwnd);
 	ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
 
@@ -179,11 +198,11 @@ HRESULT  FakePresent(
 	/* [in] */ UINT SyncInterval,
 	/* [in] */ UINT Flags)
 {
-	static auto once = [pSwapChain]()
+	if (g_bHooked == false)
 	{
 		InitWork(pSwapChain);
-		return true;
-	}();
+		g_bHooked = true;
+	}
 
 	// Start the Dear ImGui frame
 
@@ -218,7 +237,10 @@ int Dx11Hook(void *Param)
 	gSwapVTable = *(int64_t**)g_pSwapChain;
 	g_OriginPresentCall = (PresentCall)gSwapVTable[IDXGISwapChainvTable::PRESENT];
 
+	g_OriginResizeBuffersCall = (ResizeBuffersCall)gSwapVTable[IDXGISwapChainvTable::RESIZE_BUFFERS];
+
 	HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, FakePresent);
+	HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, FakeResizeBuffers);
 
 	g_pSwapChain->Release();
 
@@ -277,3 +299,30 @@ void SetupWndProcHook()
 	gHwndOldWndProc = (WNDPROC)SetWindowLongPtr(gHwnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hooked);
 }
 
+
+
+HRESULT  FakeResizeBuffers(
+	IDXGISwapChain* pSwapChain,
+	/* [in] */ UINT BufferCount,
+	/* [in] */ UINT Width,
+	/* [in] */ UINT Height,
+	/* [in] */ DXGI_FORMAT NewFormat,
+	/* [in] */ UINT SwapChainFlags)
+{
+	if (g_pd3dDevice)
+	{
+		g_pd3dDevice->Release();
+		g_pd3dDevice = nullptr;
+		g_mainRenderTargetView->Release();
+		g_mainRenderTargetView = nullptr;
+
+		ImGui_ImplDX11_Shutdown();
+		g_bHooked = false;
+		HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, FakePresent);
+	}
+
+
+
+
+	return g_OriginResizeBuffersCall(pSwapChain,BufferCount,Width,Height, NewFormat,SwapChainFlags);
+ }

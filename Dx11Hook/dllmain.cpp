@@ -13,7 +13,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        StartHook("UnrealWindow",nullptr);
+        StartHook("GxWindowClass",nullptr);
     }
     break;
     case DLL_THREAD_ATTACH:
