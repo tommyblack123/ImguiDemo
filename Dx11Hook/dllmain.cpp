@@ -3,6 +3,7 @@
 
 #include "Dx11Hook.h"
 
+//https://paper.seebug.org/2037/
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved

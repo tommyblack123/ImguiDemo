@@ -21,13 +21,47 @@ static IDXGISwapChain* g_pSwapChain = NULL;
 static ID3D11RenderTargetView* g_mainRenderTargetView = NULL;
 
 static HWND gHwnd = nullptr;
+static WNDPROC gHwndOldWndProc = nullptr;
+
 
 static int64_t* gSwapVTable = nullptr;
+
+namespace vars
+{
+	static bool bMenuOpen = true;
+}
+
+enum IDXGISwapChainvTable //for dx10 / dx11
+{
+	QUERY_INTERFACE,
+	ADD_REF,
+	RELEASE,
+	SET_PRIVATE_DATA,
+	SET_PRIVATE_DATA_INTERFACE,
+	GET_PRIVATE_DATA,
+	GET_PARENT,
+	GET_DEVICE,
+	PRESENT,
+	GET_BUFFER,
+	SET_FULLSCREEN_STATE,
+	GET_FULLSCREEN_STATE,
+	GET_DESC,
+	RESIZE_BUFFERS,
+	RESIZE_TARGET,
+	GET_CONTAINING_OUTPUT,
+	GET_FRAME_STATISTICS,
+	GET_LAST_PRESENT_COUNT
+};
+
+
+
 
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void CreateRenderTarget();
 void CleanupRenderTarget();
+void SetupWndProcHook();
+
 
 HRESULT  FakePresent(
 	IDXGISwapChain* pSwapChain,
@@ -122,6 +156,8 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 	pBackBuffer->Release();
 
 
+	SetupWndProcHook();
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -143,13 +179,11 @@ HRESULT  FakePresent(
 	/* [in] */ UINT SyncInterval,
 	/* [in] */ UINT Flags)
 {
-	static bool bHasInit = false;
-
-	if (!bHasInit)
+	static auto once = [pSwapChain]()
 	{
 		InitWork(pSwapChain);
-		bHasInit = true;
-	}
+		return true;
+	}();
 
 	// Start the Dear ImGui frame
 
@@ -182,9 +216,9 @@ int Dx11Hook(void *Param)
 	}
 
 	gSwapVTable = *(int64_t**)g_pSwapChain;
-	g_OriginPresentCall = (PresentCall)gSwapVTable[8];
+	g_OriginPresentCall = (PresentCall)gSwapVTable[IDXGISwapChainvTable::PRESENT];
 
-	HookVtb(gSwapVTable, 8, FakePresent);
+	HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, FakePresent);
 
 	g_pSwapChain->Release();
 
@@ -203,3 +237,43 @@ void StartHook(const char* WndClassName,const char *WndTitle)
 	std::thread(Dx11Hook, gHwnd).detach();
 
 }
+
+
+
+extern
+LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+LRESULT CALLBACK WndProc_Hooked(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	static auto once = []()
+	{
+		std::cout << __FUNCTION__ << " first called!" << std::endl;
+
+		return true;
+	}();
+
+	//////如果按下INS键，就打开或关闭外挂设置界面，如果之前是关闭的就打开，如果是打开的就关闭。
+	//if (uMsg == WM_KEYDOWN && wParam == VK_INSERT)
+	//{
+	//	vars::bMenuOpen = !vars::bMenuOpen;
+	//	return FALSE;
+	//}
+
+	////如果外挂设置界面是打开状态，则调用ImGui的消息处理
+	//if (vars::bMenuOpen && ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+	//{
+	//	return TRUE;
+	//}
+
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+		return TRUE;
+
+
+	return CallWindowProc(gHwndOldWndProc, hwnd, uMsg, wParam, lParam);
+}
+
+void SetupWndProcHook()
+{
+	gHwndOldWndProc = (WNDPROC)SetWindowLongPtr(gHwnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hooked);
+}
+

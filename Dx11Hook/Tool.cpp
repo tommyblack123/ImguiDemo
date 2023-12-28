@@ -1,6 +1,6 @@
+
 #include "Tool.h"
-#include <windows.h>
-#include <iostream>
+
 
 int  CreateConsole() {
 	AllocConsole();
