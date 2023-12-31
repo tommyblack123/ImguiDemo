@@ -223,16 +223,35 @@ HRESULT  FakePresent(
 }
 
 
+
+int64_t GetSwapChainObj()
+{
+	//获取游戏中的 SwapChain 以死寂为例
+
+	//[[[[0x00007FF7D68D6510]+0x2688]]+70] 
+
+	int64_t nBase = 0x00007FF7D68D6510;
+
+	nBase = *(int64_t*)(nBase + 0);
+	nBase = *(int64_t*)(nBase + 0x2688);
+	nBase = *(int64_t*)(nBase + 0);
+	nBase = *(int64_t*)(nBase + 0x70);
+
+	return nBase;
+}
+
 int Dx11Hook(void *Param)
 {
 	HWND hwnd = (HWND)Param;
 	// Initialize Direct3D
-	if (!CreateDeviceD3D(hwnd))
-	{
-		CleanupDeviceD3D();
-		//::UnregisterClassW(wc.lpszClassName, wc.hInstance);
-		return 1;
-	}
+	//if (!CreateDeviceD3D(hwnd))
+	//{
+	//	CleanupDeviceD3D();
+	//	//::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+	//	return 1;
+	//}
+
+	g_pSwapChain = (IDXGISwapChain*)GetSwapChainObj();
 
 	gSwapVTable = *(int64_t**)g_pSwapChain;
 	g_OriginPresentCall = (PresentCall)gSwapVTable[IDXGISwapChainvTable::PRESENT];
@@ -242,7 +261,7 @@ int Dx11Hook(void *Param)
 	HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, FakePresent);
 	HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, FakeResizeBuffers);
 
-	g_pSwapChain->Release();
+	//g_pSwapChain->Release();
 
 	return 1;
 }

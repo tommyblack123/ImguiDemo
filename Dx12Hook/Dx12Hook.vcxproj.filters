@@ -57,6 +57,9 @@
     <ClInclude Include="Dx12Hook.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="d3d12hook.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -87,6 +90,9 @@
       <Filter>tool</Filter>
     </ClCompile>
     <ClCompile Include="Dx12Hook.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d12hook.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

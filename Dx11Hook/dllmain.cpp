@@ -1,6 +1,6 @@
 ﻿// dllmain.cpp : 定义 DLL 应用程序的入口点。
 #include "pch.h"
-
+#include "Tool.h"
 #include "Dx11Hook.h"
 
 //https://paper.seebug.org/2037/
@@ -13,7 +13,11 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
     {
-        StartHook("GxWindowClass",nullptr);
+
+        //UnrealWindow
+        OutputDebugStringEx("[wow1] %s:%d\r\n", __FUNCTION__, __LINE__);
+        StartHook("UnrealWindow", nullptr);
+        //StartHook("GxWindowClass",nullptr); //魔兽
     }
     break;
     case DLL_THREAD_ATTACH:

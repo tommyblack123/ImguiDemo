@@ -170,6 +170,7 @@
     <ClInclude Include="..\imguisrc\dx12\imstb_rectpack.h" />
     <ClInclude Include="..\imguisrc\dx12\imstb_textedit.h" />
     <ClInclude Include="..\imguisrc\dx12\imstb_truetype.h" />
+    <ClInclude Include="d3d12hook.h" />
     <ClInclude Include="Dx12Hook.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Tool.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="..\imguisrc\dx12\imgui_impl_win32.cpp" />
     <ClCompile Include="..\imguisrc\dx12\imgui_tables.cpp" />
     <ClCompile Include="..\imguisrc\dx12\imgui_widgets.cpp" />
+    <ClCompile Include="d3d12hook.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Dx12Hook.cpp" />
     <ClCompile Include="pch.cpp">
