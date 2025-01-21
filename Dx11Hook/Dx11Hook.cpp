@@ -117,8 +117,8 @@ bool CreateDeviceD3D(HWND hWnd)
 		&g_pSwapChain, NULL, NULL, NULL);
 
 
-	//D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE,
-	//	NULL, NULL,&feature_level, 1, D3D11_SDK_VERSION, &scd, &swapchain, &device, NULL, &context);
+	/*D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE,
+		NULL, NULL,&feature_level, 1, D3D11_SDK_VERSION, &scd, &swapchain, &device, NULL, &context);*/
 	
 
 	if (res != S_OK)
@@ -244,14 +244,14 @@ int Dx11Hook(void *Param)
 {
 	HWND hwnd = (HWND)Param;
 	// Initialize Direct3D
-	//if (!CreateDeviceD3D(hwnd))
-	//{
-	//	CleanupDeviceD3D();
-	//	//::UnregisterClassW(wc.lpszClassName, wc.hInstance);
-	//	return 1;
-	//}
+	if (!CreateDeviceD3D(hwnd))
+	{
+		CleanupDeviceD3D();
+		//::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+		return 1;
+	}
 
-	g_pSwapChain = (IDXGISwapChain*)GetSwapChainObj();
+	//g_pSwapChain = (IDXGISwapChain*)GetSwapChainObj();
 
 	gSwapVTable = *(int64_t**)g_pSwapChain;
 	g_OriginPresentCall = (PresentCall)gSwapVTable[IDXGISwapChainvTable::PRESENT];
@@ -261,7 +261,7 @@ int Dx11Hook(void *Param)
 	HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, FakePresent);
 	HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, FakeResizeBuffers);
 
-	//g_pSwapChain->Release();
+	g_pSwapChain->Release();
 
 	return 1;
 }
@@ -294,11 +294,11 @@ LRESULT CALLBACK WndProc_Hooked(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	}();
 
 	//////如果按下INS键，就打开或关闭外挂设置界面，如果之前是关闭的就打开，如果是打开的就关闭。
-	//if (uMsg == WM_KEYDOWN && wParam == VK_INSERT)
-	//{
-	//	vars::bMenuOpen = !vars::bMenuOpen;
-	//	return FALSE;
-	//}
+	if (uMsg == WM_KEYDOWN && wParam == VK_INSERT)
+	{
+		vars::bMenuOpen = !vars::bMenuOpen;
+		return FALSE;
+	}
 
 	////如果外挂设置界面是打开状态，则调用ImGui的消息处理
 	//if (vars::bMenuOpen && ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
