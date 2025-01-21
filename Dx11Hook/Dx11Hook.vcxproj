@@ -131,7 +131,7 @@
       <AdditionalIncludeDirectories>..\\imguisrc\\dx11;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4996;</DisableSpecificWarnings>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -170,6 +170,7 @@
     <ClInclude Include="..\imguisrc\dx11\imstb_rectpack.h" />
     <ClInclude Include="..\imguisrc\dx11\imstb_textedit.h" />
     <ClInclude Include="..\imguisrc\dx11\imstb_truetype.h" />
+    <ClInclude Include="baidu_font.hpp" />
     <ClInclude Include="Dx11Hook.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Tool.h" />

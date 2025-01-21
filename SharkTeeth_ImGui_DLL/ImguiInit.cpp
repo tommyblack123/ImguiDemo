@@ -2,6 +2,8 @@
 #include <dwmapi.h>
 #include"Imgui/baidu_font.hpp"
 
+#include "UeEngineTools.h"
+
 //d3d11.lib; d3dcompiler.lib; dxgi.lib;
 #pragma comment(lib,"d3d11.lib")
 
@@ -242,6 +244,11 @@ namespace XZ {
             {
                 ::PostMessage(m_ÃÉ°å´°¿Ú¾ä±ú,WM_CLOSE,  0, 0);
             }
+
+			if (ImGui::Button(u8"»æÖÆActorÀà"))
+			{
+                UeEngineTools::DrawAllActors();
+			}
 
 
             ImGui::SameLine();

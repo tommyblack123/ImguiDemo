@@ -9,6 +9,7 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 #include "Tool.h"
+#include "baidu_font.hpp"
 
 #pragma comment(lib,"d3d11.lib")
 
@@ -180,8 +181,16 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.Fonts->AddFontFromFileTTF("c:/windows/fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+		//io.Fonts->AddFontFromFileTTF("c:/windows/fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+		
+		ImFontConfig f_cfg;
+		f_cfg.FontDataOwnedByAtlas = false;
+		ImFont* font = io.Fonts->AddFontFromMemoryTTF((void*)baidu_font_data, baidu_font_size, 18.0f, &f_cfg, io.Fonts->GetGlyphRangesChineseFull());
+		
+		
 		ImGui::StyleColorsDark();
+
+
 		ImGui_ImplWin32_Init(gHwnd);
 		return true;
 	}();
@@ -191,7 +200,7 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 
 	return true;
 }
-
+void UnSetup();
 
 HRESULT  FakePresent(
 	IDXGISwapChain* pSwapChain,
@@ -211,7 +220,15 @@ HRESULT  FakePresent(
 	ImGui::NewFrame();
 	ImGui::Begin("wow1");
 
+	if (ImGui::Button(u8"½áÊøÍË³ö"))
+	{
+		HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, g_OriginPresentCall);
+		HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, g_OriginResizeBuffersCall);
 
+		//CleanupDeviceD3D();
+		UnSetup();
+		return 0;
+	}
 	ImGui::End();
 	// Rendering
 	ImGui::Render();
