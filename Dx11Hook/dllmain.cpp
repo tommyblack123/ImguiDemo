@@ -17,7 +17,6 @@ DWORD __stdcall ExitThreadCallBack(void* lParam) {
 void UnSetup()
 {
 
-
 	auto h = ::CreateThread(NULL, 0, ExitThreadCallBack, NULL, 0, NULL);
 	::CloseHandle(h);
 

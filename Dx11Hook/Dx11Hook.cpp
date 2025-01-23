@@ -10,6 +10,7 @@
 #include "imgui_impl_dx11.h"
 #include "Tool.h"
 #include "baidu_font.hpp"
+#include "UeEngineTools.h"
 
 #pragma comment(lib,"d3d11.lib")
 
@@ -64,7 +65,7 @@ void CleanupDeviceD3D();
 void CreateRenderTarget();
 void CleanupRenderTarget();
 void SetupWndProcHook();
-
+void UnSetupWndProcHook();
 
 HRESULT  FakePresent(
 	IDXGISwapChain* pSwapChain,
@@ -186,11 +187,8 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 		ImFontConfig f_cfg;
 		f_cfg.FontDataOwnedByAtlas = false;
 		ImFont* font = io.Fonts->AddFontFromMemoryTTF((void*)baidu_font_data, baidu_font_size, 18.0f, &f_cfg, io.Fonts->GetGlyphRangesChineseFull());
-		
-		
+			
 		ImGui::StyleColorsDark();
-
-
 		ImGui_ImplWin32_Init(gHwnd);
 		return true;
 	}();
@@ -201,6 +199,20 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 	return true;
 }
 void UnSetup();
+
+
+bool gStartDraw = false;
+
+
+void DrawAllActors(std::string clsname, float x,float y)
+{
+
+	//开始绘制
+	ImGui::GetForegroundDrawList()->AddText({ x,y }, ImColor(255, 255, 0), clsname.data());
+}
+
+
+
 
 HRESULT  FakePresent(
 	IDXGISwapChain* pSwapChain,
@@ -222,20 +234,35 @@ HRESULT  FakePresent(
 
 	if (ImGui::Button(u8"结束退出"))
 	{
-		HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, g_OriginPresentCall);
-		HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, g_OriginResizeBuffersCall);
 
 		//CleanupDeviceD3D();
+		UnSetupWndProcHook();
+		HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, g_OriginPresentCall);
+		HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, g_OriginResizeBuffersCall);
 		UnSetup();
 		return 0;
 	}
+
+	if (ImGui::Button(u8"绘制actor"))
+	{
+		gStartDraw = !gStartDraw;
+	}
+
+	if (gStartDraw)
+	{
+		UeEngineTools::DrawAllActors(DrawAllActors);
+	}
+
+
+
+
 	ImGui::End();
 	// Rendering
 	ImGui::Render();
 	g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-	OutputDebugStringEx("[wow1] hooking\r\n");
+	//OutputDebugStringEx("[wow1] hooking\r\n");
 	return g_OriginPresentCall(pSwapChain, SyncInterval, Flags);
 }
 
@@ -334,6 +361,12 @@ void SetupWndProcHook()
 {
 	gHwndOldWndProc = (WNDPROC)SetWindowLongPtr(gHwnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hooked);
 }
+
+void UnSetupWndProcHook()
+{
+	SetWindowLongPtr(gHwnd, GWLP_WNDPROC, (LONG_PTR)gHwndOldWndProc);
+}
+
 
 
 

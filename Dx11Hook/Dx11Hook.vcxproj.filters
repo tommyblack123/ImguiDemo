@@ -22,6 +22,9 @@
     <Filter Include="tool">
       <UniqueIdentifier>{54e072de-5d74-4b7f-947f-575a996a9407}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UEngine">
+      <UniqueIdentifier>{30026f75-dd9a-4017-8024-110e6d3c5dd8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -60,6 +63,9 @@
     <ClInclude Include="baidu_font.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="UeEngineTools.h">
+      <Filter>UEngine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -91,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="Tool.cpp">
       <Filter>tool</Filter>
+    </ClCompile>
+    <ClCompile Include="UeEngineTools.cpp">
+      <Filter>UEngine</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
