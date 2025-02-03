@@ -16,17 +16,27 @@ typedef void(*DrawBoneLineCallBack)( float x, float y, float x1, float y1,int r,
 
 
 
-//死寂
-const static int64_t GNameOffset = 0x4A99140;
 
-const static int64_t GWorldOffset = 0x4C1D800;
+//polygon
+const static int64_t GNameOffset = 0x807A100;
 
-const static int64_t WorldToScreenOffset = 0x2BE5730;
+const static int64_t GWorldOffset = 0x8279F20;
 
-const static int64_t GetBoneMatrixOffset = 0x289B280;
+const static int64_t WorldToScreenOffset = 0x49E8E00;
+
+//先在sdk里搜索 TransformFromBoneSpace,定位到真实call之后
+/*
+* 
+	 if ( BoneIndex != -1 )
+	  {
+		GetBoneMatrix(pThis, &fMatrix, BoneIndex);
+*/
+
+const static int64_t GetBoneMatrixOffset = 0x48CD990;
 
 
-const static int64_t LineTraceSingleOffset = 0x2A08BF0;
+//搜索LineTraceSingle(  定位尾部真实call ,倒数第二个
+const static int64_t LineTraceSingleOffset = 0x4AD8FE0;
 
 
 
@@ -432,8 +442,8 @@ namespace UeEngineTools
 	public:
 		unsigned char                                      pa_00[0x30];
 		class ULevel* PersistentLevel;                                            // 0x0030   (0x0008)  当前关卡
-		unsigned char                                      pa_38[0x148];
-		UGameInstance* OwningGameInstance;  // 0x180
+		unsigned char                                      pa_38[0x180];
+		UGameInstance* OwningGameInstance;  // 修复!
 
 	};
 
