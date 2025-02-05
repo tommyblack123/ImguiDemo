@@ -166,26 +166,26 @@ namespace UeEngineTools
 	};
 	struct Vector2
 	{
-		float X = 0;
-		float Y = 0;
+		double X = 0;
+		double Y = 0;
 	};
 
 	struct Vector3 : public Vector2
 	{
-		float Z = 0;
+		double Z = 0;
 	};
 
 	struct Vector4 : public Vector3
 	{
-		float W = 0;
+		double W = 0;
 	};
 
 	struct FMatrix
 	{
-		float _11, _12, _13, _14;
-		float _21, _22, _23, _24;
-		float _31, _32, _33, _34;
-		float _41, _42, _43, _44;
+		double _11, _12, _13, _14;
+		double _21, _22, _23, _24;
+		double _31, _32, _33, _34;
+		double _41, _42, _43, _44;
 
 		FMatrix operator*(const FMatrix& other);
 	};
@@ -352,8 +352,8 @@ namespace UeEngineTools
 	class AActor
 	{
 	public:
-		UCHAR pa_00[0x130];
-		USceneComponent* RootComponent;
+		UCHAR pa_00[0x198];
+		USceneComponent* RootComponent; //198 已修复
 	};
 
 
@@ -386,16 +386,16 @@ namespace UeEngineTools
 	class APawn : public AActor
 	{
 	public:
-		UCHAR pa_138[0x120];
-		AController* Controller; //+0x258
-		UCHAR pa_260[0x20];
+		UCHAR pa_1a0[0x128];
+		AController* Controller; //+0x2C8
+		UCHAR pa_2D0[0x48];
 	};
 
 
 	class ACharacter : public APawn
 	{
 	public:
-		USkeletalMeshComponent* Mesh; //实际是在ACharacter下面  +0x280
+		USkeletalMeshComponent* Mesh; //实际是在ACharacter下面  +0x318  已修复
 	};
 
 
@@ -404,7 +404,8 @@ namespace UeEngineTools
 	public:
 
 		UCHAR pa_00[0x98];
-		TArray<ACharacter*> Actors;
+		//需要在ce里观察当前关卡下，符合TArray特征的
+		TArray<ACharacter*> Actors;  //已修复
 
 	};
 
@@ -443,7 +444,7 @@ namespace UeEngineTools
 		unsigned char                                      pa_00[0x30];
 		class ULevel* PersistentLevel;                                            // 0x0030   (0x0008)  当前关卡
 		unsigned char                                      pa_38[0x180];
-		UGameInstance* OwningGameInstance;  // 修复!
+		UGameInstance* OwningGameInstance;  // 已修复! 0x01B8
 
 	};
 
