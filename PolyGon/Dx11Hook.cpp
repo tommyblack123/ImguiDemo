@@ -153,6 +153,26 @@ void CreateRenderTarget()
 
 bool InitWork(IDXGISwapChain* pSwapChain)
 {
+
+	static bool bInit = false;
+	if (!bInit)
+	{
+		SetupWndProcHook();
+
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		//io.Fonts->AddFontFromFileTTF("c:/windows/fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+
+		ImFontConfig f_cfg;
+		f_cfg.FontDataOwnedByAtlas = false;
+		ImFont* font = io.Fonts->AddFontFromMemoryTTF((void*)baidu_font_data, baidu_font_size, 18.0f, &f_cfg, io.Fonts->GetGlyphRangesChineseFull());
+
+		ImGui::StyleColorsDark();
+		ImGui_ImplWin32_Init(gHwnd);
+		bInit = true;
+	}
+
 	pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)&g_pd3dDevice);
 
 	if (g_pd3dDevice)
@@ -173,25 +193,6 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 	g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_mainRenderTargetView);
 	pBackBuffer->Release();
 
-	
-
-	static auto once = []()
-	{
-		SetupWndProcHook();
-
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		//io.Fonts->AddFontFromFileTTF("c:/windows/fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
-		
-		ImFontConfig f_cfg;
-		f_cfg.FontDataOwnedByAtlas = false;
-		ImFont* font = io.Fonts->AddFontFromMemoryTTF((void*)baidu_font_data, baidu_font_size, 18.0f, &f_cfg, io.Fonts->GetGlyphRangesChineseFull());
-			
-		ImGui::StyleColorsDark();
-		ImGui_ImplWin32_Init(gHwnd);
-		return true;
-	}();
 
 	ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
