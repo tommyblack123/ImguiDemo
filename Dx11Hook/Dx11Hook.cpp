@@ -150,34 +150,30 @@ void CreateRenderTarget()
 }
 
 
+static bool g_bInit = false;
 
 bool InitWork(IDXGISwapChain* pSwapChain)
 {
 
-	static bool bInit = false;
 
-	if (!bInit)
+	if (!g_bInit)
 	{
-		bInit = true;
+		g_bInit = true;
 		SetupWndProcHook();
-
 		IMGUI_CHECKVERSION();
-		OutputDebugStringEx(_T("[wow1]%s:%d\r\n"), __FUNCTION__, __LINE__);
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		//io.Fonts->AddFontFromFileTTF("c:/windows/fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
-		OutputDebugStringEx(_T("[wow1]%s:%d\r\n"), __FUNCTION__, __LINE__);
+		io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
+		io.Fonts->AddFontFromFileTTF("c:/windows/fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
 		ImFontConfig f_cfg;
 		f_cfg.FontDataOwnedByAtlas = false;
-		ImFont* font = io.Fonts->AddFontFromMemoryTTF((void*)baidu_font_data, baidu_font_size, 18.0f, &f_cfg, io.Fonts->GetGlyphRangesChineseFull());
-		OutputDebugStringEx(_T("[wow1]%s:%d\r\n"), __FUNCTION__, __LINE__);
+		//ImFont* font = io.Fonts->AddFontFromMemoryTTF((void*)baidu_font_data, baidu_font_size, 18.0f, &f_cfg, io.Fonts->GetGlyphRangesChineseFull());
 		ImGui::StyleColorsDark();
 		ImGui_ImplWin32_Init(gHwnd);
-		OutputDebugStringEx(_T("[wow1]%s:%d\r\n"), __FUNCTION__, __LINE__);
+
 	};
 
 
-	OutputDebugStringEx(_T("[wow1]%s:%d\r\n"), __FUNCTION__, __LINE__);
 	pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)&g_pd3dDevice);
 
 	if (g_pd3dDevice)
@@ -187,7 +183,7 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 	else {
 		return false;
 	}
-	OutputDebugStringEx(_T("[wow1]%s:%d\r\n"), __FUNCTION__, __LINE__);
+
 
 	ID3D11Texture2D* pBackBuffer = nullptr;
 	pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBackBuffer);
@@ -197,10 +193,6 @@ bool InitWork(IDXGISwapChain* pSwapChain)
 
 	g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_mainRenderTargetView);
 	pBackBuffer->Release();
-
-	OutputDebugStringEx(_T("[wow1]%s:%d\r\n"), __FUNCTION__, __LINE__);
-
-
 
 	ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
@@ -245,57 +237,62 @@ HRESULT  FakePresent(
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-	ImGui::Begin("wow1");
 
-	if (ImGui::Button(u8"结束退出"))
+
+
+	if (vars::bMenuOpen)
 	{
+		ImGui::Begin("wow1");
 
-		//CleanupDeviceD3D();
-		UnSetupWndProcHook();
-		HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, g_OriginPresentCall);
-		HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, g_OriginResizeBuffersCall);
-		UnSetup();
-		return 0;
+		if (ImGui::Button(u8"结束退出"))
+		{
+
+			//CleanupDeviceD3D();
+			UnSetupWndProcHook();
+			HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, g_OriginPresentCall);
+			HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, g_OriginResizeBuffersCall);
+			//UnSetup();
+
+			g_bHooked = false;
+			g_bInit = false;
+			return 0;
+		}
+
+
+		if (ImGui::Button(u8"绘制actor"))
+		{
+			gStartDraw = !gStartDraw;
+		}
+
+		if (ImGui::Button(u8"绘制骨骼"))
+		{
+			gStartDrawBoneLine = !gStartDrawBoneLine;
+		}
+
+
+		if (ImGui::Button(u8"绘制障碍骨骼"))
+		{
+			gLineTraceSingle = !gLineTraceSingle;
+		}
+
+
+		if (gStartDraw)
+		{
+			UeEngineTools::DrawAllActors(DrawAllActors);
+		}
+
+		if (gStartDrawBoneLine)
+		{
+			UeEngineTools::DrawAllActorsBone(DrawActorBoneLine);
+		}
+
+		if (gLineTraceSingle)
+		{
+			UeEngineTools::DrawTraceSingle(DrawActorBoneLine);
+		}
+
+		ImGui::End();
 	}
-
-	if (ImGui::Button(u8"绘制actor"))
-	{
-		gStartDraw = !gStartDraw;
-	}
-
-	if (ImGui::Button(u8"绘制骨骼"))
-	{
-		gStartDrawBoneLine = !gStartDrawBoneLine;
-	}
-
-
-	if (ImGui::Button(u8"绘制障碍骨骼"))
-	{
-		gLineTraceSingle = !gLineTraceSingle;
-	}
-
-
-
-	ImGui::End();
-
-	if (gStartDraw)
-	{
-		UeEngineTools::DrawAllActors(DrawAllActors);
-	}
-
-	if (gStartDrawBoneLine)
-	{
-		UeEngineTools::DrawAllActorsBone(DrawActorBoneLine);
-	}
-
-	if (gLineTraceSingle)
-	{
-		UeEngineTools::DrawTraceSingle(DrawActorBoneLine);
-	}
-
-
-
-
 
 	// Rendering
 	ImGui::Render();
@@ -358,7 +355,7 @@ void StartHook(const char* WndClassName,const char *WndTitle)
 	if (!gHwnd)
 		return;
 
-	CreateConsole();
+	//CreateConsole();
 	//std::thread(Dx11Hook, gHwnd).detach();
 	Dx11Hook(gHwnd);
 }
@@ -370,18 +367,11 @@ LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 
 LRESULT CALLBACK WndProc_Hooked(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	static auto once = []()
-	{
-		std::cout << __FUNCTION__ << " first called!" << std::endl;
-
-		return true;
-	}();
 
 	//////如果按下INS键，就打开或关闭外挂设置界面，如果之前是关闭的就打开，如果是打开的就关闭。
 	if (uMsg == WM_KEYDOWN && wParam == VK_INSERT)
 	{
 		vars::bMenuOpen = !vars::bMenuOpen;
-		return FALSE;
 	}
 
 	////如果外挂设置界面是打开状态，则调用ImGui的消息处理
@@ -390,7 +380,7 @@ LRESULT CALLBACK WndProc_Hooked(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	//	return TRUE;
 	//}
 
-	if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+	if (vars::bMenuOpen && ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
 		return TRUE;
 
 
