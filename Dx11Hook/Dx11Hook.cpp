@@ -307,14 +307,14 @@ HRESULT  FakePresent(
 
 int64_t GetSwapChainObj()
 {
-	//获取游戏中的 SwapChain 以死寂为例
+	//polygon特征
 
-	//[[[[0x00007FF7D68D6510]+0x2688]]+70] 
+	//[[[[0x00007FF740D4E748]+0x2698]]+70]
 
-	int64_t nBase = 0x00007FF7D68D6510;
+	int64_t nBase = 0x00007FF740D4E748;
 
 	nBase = *(int64_t*)(nBase + 0);
-	nBase = *(int64_t*)(nBase + 0x2688);
+	nBase = *(int64_t*)(nBase + 0x2698);
 	nBase = *(int64_t*)(nBase + 0);
 	nBase = *(int64_t*)(nBase + 0x70);
 
@@ -325,14 +325,14 @@ int Dx11Hook(void *Param)
 {
 	HWND hwnd = (HWND)Param;
 	// Initialize Direct3D
-	if (!CreateDeviceD3D(hwnd))
-	{
-		CleanupDeviceD3D();
-		//::UnregisterClassW(wc.lpszClassName, wc.hInstance);
-		return 1;
-	}
+	//if (!CreateDeviceD3D(hwnd))
+	//{
+	//	CleanupDeviceD3D();
+	//	//::UnregisterClassW(wc.lpszClassName, wc.hInstance);
+	//	return 1;
+	//}
 
-	//g_pSwapChain = (IDXGISwapChain*)GetSwapChainObj();
+	g_pSwapChain = (IDXGISwapChain*)GetSwapChainObj();
 
 	gSwapVTable = *(int64_t**)g_pSwapChain;
 	g_OriginPresentCall = (PresentCall)gSwapVTable[IDXGISwapChainvTable::PRESENT];
@@ -342,7 +342,7 @@ int Dx11Hook(void *Param)
 	HookVtb(gSwapVTable, IDXGISwapChainvTable::PRESENT, FakePresent);
 	HookVtb(gSwapVTable, IDXGISwapChainvTable::RESIZE_BUFFERS, FakeResizeBuffers);
 
-	g_pSwapChain->Release();
+	//g_pSwapChain->Release();
 
 	return 1;
 }
@@ -384,12 +384,13 @@ LRESULT CALLBACK WndProc_Hooked(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		return TRUE;
 
 
-	return CallWindowProc(gHwndOldWndProc, hwnd, uMsg, wParam, lParam);
+	return CallWindowProcW(gHwndOldWndProc, hwnd, uMsg, wParam, lParam);
 }
 
 void SetupWndProcHook()
 {
-	gHwndOldWndProc = (WNDPROC)SetWindowLongPtr(gHwnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hooked);
+	gHwndOldWndProc = (WNDPROC)SetWindowLongPtrW(gHwnd, GWLP_WNDPROC, (LONG_PTR)WndProc_Hooked);
+	OutputDebugStringEx(_T("[wow1] the gHwndOldWndProc:0x%llX\r\n"), gHwndOldWndProc);
 }
 
 void UnSetupWndProcHook()
