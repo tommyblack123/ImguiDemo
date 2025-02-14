@@ -132,7 +132,8 @@ namespace UeEngineTools
 
 	std::string GetName(int nID);
 
-//dump UWorld
+	void* HookPostRender(void* FakeFunc);
+	//dump UWorld
 
 	template <typename T>
 	class TArray
@@ -361,8 +362,8 @@ namespace UeEngineTools
 	class APlayerCameraManager : public AActor
 	{
 	public:
-		char pa_138[0x19A8];
-		FCameraCacheEntry      CameraCachePrivate;   // 0x1AE0   (0x0600)
+		char pa_1a0[0x2110];
+		FCameraCacheEntry      CameraCachePrivate;   // 0x22B0  已修复
 
 	};
 
@@ -370,15 +371,15 @@ namespace UeEngineTools
 	class AController : public AActor
 	{
 	public:
-		UCHAR pa_138[0x118];
-		APawn* Pawn; //0x250 指向本地玩家
+		UCHAR pa_1a0[0x130];
+		APawn* Pawn; //0x02D0 指向本地玩家 已修复
 	};
 
 	class APlayerController : public AController
 	{
 	public:
-		char pa_258[0x60];
-		 APlayerCameraManager* PlayerCameraManager;                                        // 0x02B8   (0x0008)
+		char pa_2D8[0x70];
+		 APlayerCameraManager* PlayerCameraManager;                                        // 0x0348   (0x0008)
 	};
 
 
@@ -386,8 +387,8 @@ namespace UeEngineTools
 	class APawn : public AActor
 	{
 	public:
-		UCHAR pa_1a0[0x128];
-		AController* Controller; //+0x2C8
+		UCHAR pa_1A0[0x128];
+		AController* Controller; //+0x2C8 已修复
 		UCHAR pa_2D0[0x48];
 	};
 
@@ -413,7 +414,7 @@ namespace UeEngineTools
 	{
 	public:
 		unsigned char      UnknownData00_8[0x30];     
-		APlayerController* PlayerController;  // 0x0030   (0x0008)  
+		APlayerController* PlayerController;  // 0x0030   已修复
 
 	};
 

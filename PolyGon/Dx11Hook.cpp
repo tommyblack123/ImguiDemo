@@ -350,8 +350,11 @@ void StartHook(const char* WndClassName,const char *WndTitle)
 	if (!gHwnd)
 		return;
 
-	CreateConsole();
-	std::thread(Dx11Hook, gHwnd).detach();
+	//CreateConsole();
+	//std::thread(Dx11Hook, gHwnd).detach();
+	//Dx11Hook(gHwnd);
+
+	UeEngineTools::HookPostRender(nullptr);
 
 }
 

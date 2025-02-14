@@ -385,6 +385,26 @@ UeEngineTools::AActor* UeEngineTools::UGameInstance::GetPlayer()
 }
 
 
+void* UeEngineTools::HookPostRender(void *FakeFunc)
+{
+
+	auto gworld = GetGWorld();
+
+	LONG_PTR  PlayerController =  (LONG_PTR)gworld->OwningGameInstance->GetPlayerController();
+
+
+	LONG_PTR vtbale = (PlayerController + 0);
+	
+
+
+	void* realfunc = *(void**)(vtbale + 0x778);
+
+	OutputDebugStringEx("[wow1] the PostRender:0x%llX\r\n", realfunc);
+
+	return realfunc;
+}
+
+
 
 bool UeEngineTools::FTransform::ToMatrixWithScale(OUT UeEngineTools::FMatrix &outmatrix)
 {
